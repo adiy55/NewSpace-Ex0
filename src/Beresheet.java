@@ -55,13 +55,6 @@ public class Beresheet {
         return _ang;
     }
 
-    public void addAng(double val) {
-        double tmp = _ang + val;
-        if (tmp < 90 && tmp > 0) {
-            _ang = tmp;
-        }
-    }
-
     public double getTime() {
         return _time;
     }
@@ -109,54 +102,43 @@ public class Beresheet {
         return norm * Moon.EQ_SPEED;
     }
 
+    public double getDesiredAng() {
+        if (_alt > 1500) {
+            return 60;
+        } else if (_alt > 1400) {
+            return 50;
+        } else if (_alt > 1200) {
+            return 40;
+        } else if (_alt > 1000) {
+            return 30;
+        } else if (_alt > 500) {
+            return 10;
+        }
+        return 0;
+    }
+
     public void addPower(double gas) {
         double tmp = _NN + gas;
         if (tmp >= 0 && tmp <= 1) {
             _NN = tmp;
         }
+        if (tmp > 1) {
+            _NN = 1;
+        }
+        if (tmp < 0) {
+            _NN = 0;
+        }
     }
 
-    public void updateAng(double change_ang, double dt) {
-//        double ang = _ang + change_ang; // change_ang is from angPID
-//        double ang_velocity = 3;
-//        double tmp;
-//        if (ang >= _ang + 3) { // check if updated angle is in constraint
-//            tmp = _ang + ang_velocity * dt;
-//            if (tmp > 90) {
-//                _ang = 90;
-//                return;
-//            }
-//            _ang = tmp;
-//            return;
-//        } else if (ang <= _ang - 3) {
-//            tmp = _ang - ang_velocity * dt;
-//            if (tmp < 0) {
-//                _ang = 0;
-//                return;
-//            }
-//            _ang = tmp;
-//            return;
-//        } else if (ang > 90) {
-//            _ang = 90;
-//            return;
-//        } else if (ang < 0) {
-//            _ang = 0;
-//            return;
-//        }
-//        _ang = ang;
-
-        if (Math.abs(_hs) < 3) {
-            double new_ang = _ang + change_ang;
-            if (new_ang >= 3 * dt) {
-                _ang += change_ang - 3 * dt;
-            } else {
-                _ang -= change_ang;
-            }
+    public void addAng(double val) {
+        double tmp = _ang + val;
+        if (tmp < 90 && tmp > 0) {
+            _ang = tmp;
         }
-        if (_ang > 90) {
+        if (tmp > 90) {
             _ang = 90;
         }
-        if (_ang < 0) {
+        if (tmp < 0) {
             _ang = 0;
         }
     }
@@ -177,10 +159,11 @@ public class Beresheet {
             _acc = 0;
         }
         v_acc -= vacc;
+        if (_hs < 2.5) {
+            _hs = 0;
+        }
         if (_hs > 0) {
             _hs -= h_acc * dt;
-        } else if (_hs < 2.5) {
-            _hs = 0;
         }
         _dist -= _hs * dt;
         _vs -= v_acc * dt;
