@@ -116,6 +116,51 @@ public class Beresheet {
         }
     }
 
+    public void updateAng(double change_ang, double dt) {
+//        double ang = _ang + change_ang; // change_ang is from angPID
+//        double ang_velocity = 3;
+//        double tmp;
+//        if (ang >= _ang + 3) { // check if updated angle is in constraint
+//            tmp = _ang + ang_velocity * dt;
+//            if (tmp > 90) {
+//                _ang = 90;
+//                return;
+//            }
+//            _ang = tmp;
+//            return;
+//        } else if (ang <= _ang - 3) {
+//            tmp = _ang - ang_velocity * dt;
+//            if (tmp < 0) {
+//                _ang = 0;
+//                return;
+//            }
+//            _ang = tmp;
+//            return;
+//        } else if (ang > 90) {
+//            _ang = 90;
+//            return;
+//        } else if (ang < 0) {
+//            _ang = 0;
+//            return;
+//        }
+//        _ang = ang;
+
+        if (Math.abs(_hs) < 3) {
+            double new_ang = _ang + change_ang;
+            if (new_ang >= 3 * dt) {
+                _ang += change_ang - 3 * dt;
+            } else {
+                _ang -= change_ang;
+            }
+        }
+        if (_ang > 90) {
+            _ang = 90;
+        }
+        if (_ang < 0) {
+            _ang = 0;
+        }
+    }
+
     public void computeStep(double dt) {
         // main computations
         double ang_rad = Math.toRadians(_ang);
@@ -147,11 +192,11 @@ public class Beresheet {
         Beresheet beresheet = new Beresheet();
         // starting point:
         double dt = 1; // sec
-        double vs, hs, ang;
+        double vs, hs, change_ang, ang;
         double dvs, dhs, gas;
 
         PID vsPID = new PID(0.04, 0.0003, 0.2, 100);
-        PID hsPID = new PID(0.0006, 0.0, 0.0, 950);
+        PID angPID = new PID(0.0006, 0.0, 0.0, 100);
 
         // ***** main simulation loop ******
         while (beresheet.getAlt() > 0) {
@@ -159,20 +204,18 @@ public class Beresheet {
             vs = beresheet.getVs();
             hs = beresheet.getHs();
 
-            // 2 km above the surface
             dvs = beresheet.getDesiredVs();
             gas = vsPID.update(vs - dvs, dt);
             beresheet.addPower(gas);
 
             dhs = beresheet.getDesiredHs();
-            ang = hsPID.update(hs - dhs, dt);
-            beresheet.addAng(ang);
+            change_ang = angPID.update(hs - dhs, dt);
+            beresheet.updateAng(change_ang, dt);
 
             if (beresheet.getTime() % 10 == 0 || beresheet.getAlt() < 100) {
                 System.out.println(beresheet);
             }
-
-//            // if hs is less than 3, angle should be zero (for landing)
+            // if hs is less than 3, angle should be zero (for landing)
 //            if (Math.abs(hs) < 3) {
 //                ang = beresheet.getAng();
 //                if (ang >= 3 * dt) {
