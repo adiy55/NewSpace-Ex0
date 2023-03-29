@@ -54,6 +54,34 @@ public class Beresheet {
         return norm * Moon.EQ_SPEED;
     }
 
+    public static double updateAngle(double curr_angle, double change_angle, double dt) {
+        double angle = curr_angle + change_angle;
+        double angular_momentum = 3;
+        if (angle >= curr_angle + 3) {
+            if (curr_angle + angular_momentum * dt > 90)
+            {
+                return 90;
+            }
+            return curr_angle + angular_momentum * dt;
+        }
+        else if (angle <= curr_angle - 3) {
+            if (curr_angle - angular_momentum * dt < 0)
+            {
+                return 0;
+            }
+            return curr_angle - angular_momentum * dt;
+        }
+        else if (angle > 90)
+        {
+            return 90;
+        }
+        else if (angle < 0)
+        {
+            return 0;
+        }
+        return angle;
+    }
+
     public static double updatePower(double curr_power, double gas) {
         double power = curr_power + gas;
         if (power < 0) {
@@ -71,37 +99,59 @@ public class Beresheet {
         double vs = 24.8;
         double hs = 932;
         double dist = 181 * 1000;
-        double ang = 58.3; // zero is vertical (as in landing)
+        double ang = 60; // zero is vertical (as in landing)
         double alt = 13748; // 2:25:40 (as in the simulation) // https://www.youtube.com/watch?v=JJ0VfRL9AMs
         double time = 0;
-        double dt = 1; // sec
+        double dt = 0.1; // sec
         double acc = 0; // Acceleration rate (m/s^2)
         double fuel = 121; //
         double weight = WEIGHT_EMP + fuel;
 
-        PID vsPID = new PID(0.04, 0.0003, 0.2, 100);
+        PID vsPID = new PID(0.3, 0.01, 9, 100);
         double dvs, gas;
+
+        PID hsPID = new PID(0.06, 0.00002, 4, 100);
+        double dhs, change_ang;
 
         System.out.println("time, vs, hs, dist, alt, ang, weight, acc");
         double power = 0.7; // rate[0,1]
         // ***** main simulation loop ******
 
         while (alt > 0) {
-            if (time % 10 == 0 || alt < 100) {
-                System.out.println(time + "," + vs + "," + hs + "," + dist + "," + alt + "," + ang + "," + weight + "," + acc);
-            }
+            //if (time % 10 == 0 || alt < 100) {
+            System.out.println(time + "," + vs + "," + hs + "," + dist + "," + alt + "," + ang + "," + weight + "," + acc + ", " + power);
+            //}
 
+            dvs = desired_vs(alt);
+            dhs = desired_hs(alt);
+
+            double epsilon = 1;
+
+
+//            if (Math.abs(vs - dvs) > epsilon || Math.abs(hs - hvs) > epsilon) {
+//                change_ang = hsPID.update(hs - hvs, dt);
+//                ang = updateAngle(ang, change_ang, dt);
+//            }
             dvs = desired_vs(alt);
             gas = vsPID.update(vs - dvs, dt);
             power = updatePower(power, gas);
 
-            if (Math.abs(hs) < 3) {
-                if (ang > 3) {
-                    ang -= 3;
-                } else {
-                    ang = 0;
-                }
-            }
+            dhs = desired_hs(alt);
+            change_ang = hsPID.update((hs - dhs), dt);
+            ang = updateAngle(ang, change_ang, dt);
+
+//            if (Math.abs(hs) < 3) {
+//                if (ang > 3) {
+//                    ang -= 3;
+//                } else {
+//                    ang = 0;
+//                }
+//            }
+//            else {
+//                hvs = desired_hs(alt);
+//                change_ang = hsPID.update(hs - hvs, dt);
+//                ang = updateAngle(ang, change_ang, dt);
+//            }
 
             // main computations
             double ang_rad = Math.toRadians(ang);
@@ -119,11 +169,7 @@ public class Beresheet {
             }
 
             v_acc -= vacc;
-            if (hs > 2.5) {
-                hs -= h_acc * dt;
-            } else {
-                hs = 0;
-            }
+            hs -= h_acc * dt;
             dist -= hs * dt;
             vs -= v_acc * dt;
             alt -= dt * vs;
