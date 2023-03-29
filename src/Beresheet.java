@@ -187,44 +187,5 @@ public class Beresheet {
         _alt -= dt * _vs;
     }
 
-    // 14095, 955.5, 24.8, 2.0
-    public static void main(String[] args) {
-        Beresheet beresheet = new Beresheet();
-        // starting point:
-        double dt = 1; // sec
-        double vs, hs, change_ang, ang;
-        double dvs, dhs, gas;
-
-        PID vsPID = new PID(0.04, 0.0003, 0.2, 100);
-        PID angPID = new PID(0.0006, 0.0, 0.0, 100);
-
-        // ***** main simulation loop ******
-        while (beresheet.getAlt() > 0) {
-            beresheet.computeStep(dt);
-            vs = beresheet.getVs();
-            hs = beresheet.getHs();
-
-            dvs = beresheet.getDesiredVs();
-            gas = vsPID.update(vs - dvs, dt);
-            beresheet.addPower(gas);
-
-            dhs = beresheet.getDesiredHs();
-            change_ang = angPID.update(hs - dhs, dt);
-            beresheet.updateAng(change_ang, dt);
-
-            if (beresheet.getTime() % 10 == 0 || beresheet.getAlt() < 100) {
-                System.out.println(beresheet);
-            }
-            // if hs is less than 3, angle should be zero (for landing)
-//            if (Math.abs(hs) < 3) {
-//                ang = beresheet.getAng();
-//                if (ang >= 3 * dt) {
-//                    beresheet.addAng(-3 * dt);
-//                } else {
-//                    beresheet.addAng(-ang);
-//                }
-//            }
-        }
-    }
 }
 
