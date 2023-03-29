@@ -119,7 +119,7 @@ public class Beresheet {
 
         while (alt > 0) {
             //if (time % 10 == 0 || alt < 100) {
-                System.out.println(time + "," + vs + "," + hs + "," + dist + "," + alt + "," + ang + "," + weight + "," + acc + ", " + power);
+            System.out.println(time + "," + vs + "," + hs + "," + dist + "," + alt + "," + ang + "," + weight + "," + acc + ", " + power);
             //}
 
             dvs = desired_vs(alt);
