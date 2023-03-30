@@ -36,7 +36,7 @@ public class Beresheet {
             System.out.println("time, vs, hs, dist, alt, ang, weight, acc");
             _first = false;
         }
-        return String.format("%f, %f, %f, %f, %f, %f, %f, %f", _time, _vs, _hs, _dist, _alt, _ang, _weight, _acc);
+        return String.format("%f, %f, %f, %f, %f, %f, %f, %f, %f", _time, _vs, _hs, _dist, _alt, _ang, _weight, _acc, _fuel);
     }
 
     public double getHs() {
@@ -75,7 +75,10 @@ public class Beresheet {
     public double getDesiredVs() {
         double max_alt = 30000;
         if (_alt > max_alt) {
-            return 0;
+            return 30;
+        }
+        if(_alt > 2000) {
+            return 25;
         }
         if (_alt > 1000) {
             return 23;
@@ -87,6 +90,22 @@ public class Beresheet {
             return 5 + 8 * (_alt - 70) / 430;
         }
         return 2;
+//        if (_alt > 2000) {
+//            return 25;
+//        }
+//        if (_alt > 1500) {
+//            return 15;
+//        }
+//        if (_alt > 1000) {
+//            return 10;
+//        }
+//        if (_alt > 500) {
+//            return 5;
+//        }
+//        if (_alt > 300) {
+//            return 2;
+//        }
+//        return 0;
     }
 
     public double getDesiredHs() {
@@ -103,15 +122,15 @@ public class Beresheet {
     }
 
     public double getDesiredAng() {
-        if (_alt > 1500) {
+        if (_alt > 1500 || _hs > 30) {
             return 60;
-        } else if (_alt > 1400) {
+        } else if (_alt > 1400 || _hs > 25) {
             return 50;
-        } else if (_alt > 1200) {
+        } else if (_alt > 1200 || _hs > 20) {
             return 40;
-        } else if (_alt > 1000) {
+        } else if (_alt > 1000 || _hs > 13) {
             return 30;
-        } else if (_alt > 500) {
+        } else if (_alt > 500 || _hs > 10) {
             return 10;
         }
         return 0;
@@ -138,7 +157,7 @@ public class Beresheet {
         if (tmp > 90) {
             _ang = 90;
         }
-        if (tmp < 0) {
+        if (tmp <= 3) {
             _ang = 0;
         }
     }
