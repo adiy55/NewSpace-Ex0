@@ -25,12 +25,11 @@ public class Main {
             // compute updates
             gas = vs_controller.update(vs - dvs, dt);
             beresheet.addPower(gas);
-
             gas = hs_controller.update(hs - dhs, dt);
             beresheet.addPower(gas);
 
             if (beresheet.getAlt() < 700 || beresheet.getAng() > 60) { // rotate to vertical position.
-                beresheet.addAng(-3);
+                beresheet.addAng(-3 * dt);
             }
             if (beresheet.getTime() % 10 == 0 || beresheet.getAlt() < 100) {
                 System.out.println(beresheet);
