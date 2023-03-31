@@ -13,7 +13,7 @@ public class Beresheet {
     public static final double TOTAL_THRUST = MAIN_ENG_F + 8 * SECOND_ENG_F;
 
     private double _hs, _vs, _alt, _NN, _ang, _dist, _time, _acc, _fuel, _weight;
-    private boolean _first;
+    private boolean _first; // flag for toString function
 
     Beresheet() {
         _hs = 932;
@@ -31,9 +31,9 @@ public class Beresheet {
 
     @Override
     public String toString() {
-        if (_first) {
-            System.out.println("Simulating Bereshit's Landing:");
-            System.out.println("time, vs, hs, dist, alt, ang, weight, acc");
+        if (_first) { // print only once
+            System.out.println("Simulating Beresheet's Landing:");
+            System.out.println("time, vs, hs, dist, alt, ang, weight, acc, fuel");
             _first = false;
         }
         return String.format("%f, %f, %f, %f, %f, %f, %f, %f, %f", _time, _vs, _hs, _dist, _alt, _ang, _weight, _acc, _fuel);
@@ -49,10 +49,6 @@ public class Beresheet {
 
     public double getAlt() {
         return _alt;
-    }
-
-    public double getAng() {
-        return _ang;
     }
 
     public double getTime() {
@@ -77,7 +73,7 @@ public class Beresheet {
         if (_alt > max_alt) {
             return 30;
         }
-        if(_alt > 2000) {
+        if (_alt > 2000) {
             return 25;
         }
         if (_alt > 1000) {
@@ -90,22 +86,6 @@ public class Beresheet {
             return 5 + 8 * (_alt - 70) / 430;
         }
         return 2;
-//        if (_alt > 2000) {
-//            return 25;
-//        }
-//        if (_alt > 1500) {
-//            return 15;
-//        }
-//        if (_alt > 1000) {
-//            return 10;
-//        }
-//        if (_alt > 500) {
-//            return 5;
-//        }
-//        if (_alt > 300) {
-//            return 2;
-//        }
-//        return 0;
     }
 
     public double getDesiredHs() {
@@ -119,21 +99,6 @@ public class Beresheet {
         double norm = (_alt - min_alt) / (max_alt - min_alt);
         norm = Math.pow(norm, 0.70); // [0,1]
         return norm * Moon.EQ_SPEED;
-    }
-
-    public double getDesiredAng() {
-        if (_alt > 1500 || _hs > 30) {
-            return 60;
-        } else if (_alt > 1400 || _hs > 25) {
-            return 50;
-        } else if (_alt > 1200 || _hs > 20) {
-            return 40;
-        } else if (_alt > 1000 || _hs > 13) {
-            return 30;
-        } else if (_alt > 500 || _hs > 10) {
-            return 10;
-        }
-        return 0;
     }
 
     public void addPower(double gas) {
@@ -151,7 +116,7 @@ public class Beresheet {
 
     public void addAng(double val) {
         double tmp = _ang + val;
-        if (tmp < 90 && tmp > 0) {
+        if (tmp >= 0 && tmp <= 90) {
             _ang = tmp;
         }
         if (tmp > 90) {
@@ -178,7 +143,7 @@ public class Beresheet {
             _acc = 0;
         }
         v_acc -= vacc;
-        if (_hs < 2.5) {
+        if (_hs <= 2.5) {
             _hs = 0;
         }
         if (_hs > 0) {
