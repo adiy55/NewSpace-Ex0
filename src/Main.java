@@ -29,7 +29,7 @@ public class Main {
             gas = hs_controller.update(hs - dhs, dt);
             beresheet.addPower(gas);
 
-            if (beresheet.getAlt() < 700) { // rotate to vertical position.
+            if (beresheet.getAlt() < 700 || beresheet.getAng() > 60) { // rotate to vertical position.
                 beresheet.addAng(-3);
             }
             if (beresheet.getTime() % 10 == 0 || beresheet.getAlt() < 100) {

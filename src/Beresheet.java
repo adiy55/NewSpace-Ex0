@@ -55,6 +55,10 @@ public class Beresheet {
         return _time;
     }
 
+    public double getAng() {
+        return _ang;
+    }
+
     public static double accMax(double weight) {
         return acc(weight, true, 8);
     }
